@@ -15,6 +15,7 @@ connection.connect((err) => {
 	optionsPrompt();
 });
 
+// get list of all departments and push to array
 getDepartments = () => {
 	let deptArr = [];
 	connection.query("SELECT * FROM departments", (err, res) => {
@@ -26,17 +27,19 @@ getDepartments = () => {
 	return deptArr;
 };
 
-getRoles = () => {
-	let roleArr = [];
-	connection.query("SELECT * FROM roles", (err, res) => {
+// get list of all employees and push to array
+getEmployees = () => {
+	let employeeArr = [];
+	connection.query("SELECT * FROM employees", (err, res) => {
 		if (err) throw err;
 		for (var i = 0; i < res.length; i++) {
-			roleArr.push(res[i].title);
+			employeeArr.push(res[i].title);
 		}
 	});
-	return roleArr;
+	return employeeArr;
 };
 
+// ask the user what action they want to take
 function optionsPrompt() {
 	inquirer
 		.prompt({
@@ -50,7 +53,7 @@ function optionsPrompt() {
 				"Add department",
 				"Add role",
 				"Add employee",
-				"Update employee role",
+				// "Update employee role",
 			],
 		})
 		.then((answer) => {
@@ -73,9 +76,9 @@ function optionsPrompt() {
 				case "Add employee":
 					addEmployee();
 					break;
-				case "Update employee role":
-					updateEmployee();
-					break;
+				// case "Update employee role":
+				// 	updateEmployee();
+				// 	break;
 			}
 		});
 }
@@ -88,7 +91,7 @@ viewDepartments = () => {
 	});
 };
 
-viewDepartments = () => {
+viewRoles = () => {
 	connection.query("SELECT * FROM roles", function (err, res) {
 		if (err) throw err;
 		console.table(res);
@@ -104,7 +107,7 @@ viewEmployees = () => {
 	});
 };
 
-// function to create department from user input
+// Add department from user input
 addDepartment = () => {
 	inquirer
 		.prompt([
@@ -137,7 +140,7 @@ addDepartment = () => {
 		});
 };
 
-// function to create role from user input
+// Add role from user input
 addRole = () => {
 	inquirer
 		.prompt([
@@ -199,59 +202,70 @@ addRole = () => {
 		});
 };
 
+// Add role from user input
 addEmployee = () => {
+	let roleArr = [];
+	connection.query("SELECT * FROM roles", (err, rows) => {
+		if (err) throw err;
+		roleArr.push(rows);
+	});
+
 	inquirer
 		.prompt([
 			{
 				type: "input",
-				name: "firstName",
-				message: "What is the employees first name?",
+				name: "name",
+				message: "What is the employees first and last name?",
 				validate: (answer) => {
 					if (answer) {
 						return true;
 					} else {
-						console.log("Please enter the employees first name");
-						return false;
-					}
-				},
-			},
-			{
-				type: "input",
-				name: "lastName",
-				message: "What is the employees last name?",
-				validate: (answer) => {
-					if (answer) {
-						return true;
-					} else {
-						console.log("Please enter the employees last name");
+						console.log("Please the employees first and last name");
 						return false;
 					}
 				},
 			},
 			{
 				type: "list",
-				name: "employeeRole",
-				message: "What is their role?",
-				choices: [
-					"View all employees",
-					"View employees by department",
-					"View employees by manager",
-					"Add a department",
-					"Add a role",
-					"Add an employee",
-					"Update an employee role",
-				],
+				name: "role",
+				message: "What is the employees role?",
+				choices: [roleArr.rows],
+				validate: (answer) => {
+					if (answer) {
+						return true;
+					} else {
+						console.log("Please choose a role");
+						return false;
+					}
+				},
+			},
+			{
+				type: "list",
+				name: "manager",
+				message: "Who is the employees manager?",
+				choices: ["No manager", getEmployees()],
+				validate: (answer) => {
+					if (answer) {
+						return true;
+					} else {
+						console.log("Please choose an option");
+						return false;
+					}
+				},
 			},
 		])
 		.then((answer) => {
 			connection.query(
-				`INSERT INTO departments SET ?`,
+				`INSERT INTO employees SET ?`,
 				{
-					department_name: answer.name,
+					first_name: answer.name.split(" ").slice(0, -1).join(" "),
+					last_name: answer.name.split(" ").slice(-1).join(" "),
+					role_id: answer.role,
+					manager_id: answer.manager,
 				},
 				function (err, res) {
 					if (err) throw err;
-					console.log(answer.name + " successfully added!");
+					console.log(answer.title + " successfully added!");
 					optionsPrompt();
 				}
 			);
