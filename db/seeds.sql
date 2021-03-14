@@ -20,15 +20,15 @@ VALUES
   ('Marketing Manager', '100000', 5),
   ('Content Writer', '100000', 5);
 
-INSERT INTO employees (first_name, last_name, role_id)
+INSERT INTO employees (first_name, last_name, role_id, manager_id)
 VALUES
-  ('Ronald', 'Firbank', 1),
-  ('Virginia', 'Woolf', 2),
-  ('Piers', 'Gaveston', 4),
-  ('Charles', 'LeRoi', 3),
-  ('Katherine', 'Mansfield', 5),
-  ('Dora', 'Carrington', 6),
-  ('Edward', 'Bellamy', 3),
-  ('Montague', 'Summers', 5),
-  ('Octavia', 'Butler', 5),
-  ('Unica', 'Zurn', 4);
+  ('Ronald', 'Firbank', 1, NULL),
+  ('Virginia', 'Woolf', 2, 1),
+  ('Piers', 'Gaveston', 4, 1),
+  ('Charles', 'LeRoi', 3, 1),
+  ('Katherine', 'Mansfield', 5, 1),
+  ('Dora', 'Carrington', 6, 1),
+  ('Edward', 'Bellamy', 3, 1),
+  ('Montague', 'Summers', 5, 1),
+  ('Octavia', 'Butler', 5, 1),
+  ('Unica', 'Zurn', 4, 1);
