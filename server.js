@@ -15,6 +15,28 @@ connection.connect((err) => {
 	optionsPrompt();
 });
 
+getDepartments = () => {
+	let deptArr = [];
+	connection.query("SELECT * FROM departments", (err, res) => {
+		if (err) throw err;
+		for (var i = 0; i < res.length; i++) {
+			deptArr.push(res[i].department_name);
+		}
+	});
+	return deptArr;
+};
+
+getRoles = () => {
+	let roleArr = [];
+	connection.query("SELECT * FROM roles", (err, res) => {
+		if (err) throw err;
+		for (var i = 0; i < res.length; i++) {
+			roleArr.push(res[i].title);
+		}
+	});
+	return roleArr;
+};
+
 function optionsPrompt() {
 	inquirer
 		.prompt({
@@ -25,61 +47,62 @@ function optionsPrompt() {
 				"View all departments",
 				"View all roles",
 				"View all employees",
-				"Add a department",
-				"Add a role",
-				"Add an employee",
-				"Update an employee role",
+				"Add department",
+				"Add role",
+				"Add employee",
+				"Update employee role",
 			],
 		})
 		.then((answer) => {
 			switch (answer.options) {
+				case "View all departments":
+					viewDepartments();
+					break;
+				case "View all roles":
+					viewRoles();
+					break;
 				case "View all employees":
-					viewAllEmployees();
+					viewEmployees();
 					break;
-				case "View employees by department":
-					viewByDepartment();
-					break;
-				case "View employees by manager":
-					viewByManager();
-					break;
-				case "Add a department":
+				case "Add department":
 					addDepartment();
 					break;
-				case "Add a role":
+				case "Add role":
 					addRole();
 					break;
-				case "Add an employee":
+				case "Add employee":
 					addEmployee();
 					break;
-				case "Update an employee role":
+				case "Update employee role":
 					updateEmployee();
 					break;
 			}
 		});
 }
 
-viewAllEmployees = () => {
-	connection.query("SELECT * FROM employees", function (err, res) {
+viewDepartments = () => {
+	connection.query("SELECT * FROM departments", function (err, res) {
 		if (err) throw err;
 		console.table(res);
 		optionsPrompt();
 	});
 };
 
-viewByDepartment = () => {
-	const sql = `SELECT employees.*, departments.department_id
-                AS department_name
-                FROM employees
-                LEFT JOIN departments
-                ON employees.department_id = derpartments.id`;
-
-	connection.query(sql, (err, rows, fields) => {
+viewDepartments = () => {
+	connection.query("SELECT * FROM roles", function (err, res) {
 		if (err) throw err;
-		console.table(rows);
+		console.table(res);
+		optionsPrompt();
 	});
 };
 
-viewByManager = () => {};
+viewEmployees = () => {
+	connection.query("SELECT * FROM employees", function (err, res) {
+		if (err) throw err;
+		console.table(res);
+		optionsPrompt();
+	});
+};
 
 // function to create department from user input
 addDepartment = () => {
@@ -114,7 +137,68 @@ addDepartment = () => {
 		});
 };
 
-addRole = () => {};
+// function to create role from user input
+addRole = () => {
+	inquirer
+		.prompt([
+			{
+				type: "input",
+				name: "title",
+				message: "What is the role title?",
+				validate: (answer) => {
+					if (answer) {
+						return true;
+					} else {
+						console.log("Please enter the role title");
+						return false;
+					}
+				},
+			},
+			{
+				type: "number",
+				name: "salary",
+				message: "What is the role salary?",
+				validate: (answer) => {
+					if (answer) {
+						return true;
+					} else {
+						console.log("Please enter the role salary");
+						return false;
+					}
+				},
+			},
+			{
+				type: "list",
+				name: "department",
+				message: "What department is this role in?",
+				choices: getDepartments(),
+				validate: (answer) => {
+					if (answer) {
+						return true;
+					} else {
+						console.log("Please choose a department");
+						return false;
+					}
+				},
+			},
+		])
+		.then((answer) => {
+			connection.query(
+				`INSERT INTO roles SET ?`,
+				{
+					title: answer.title,
+					salary: answer.salary,
+					department_id: answer.id,
+				},
+				function (err, res) {
+					if (err) throw err;
+					console.log(answer.title + " successfully added!");
+					optionsPrompt();
+				}
+			);
+		});
+};
+
 addEmployee = () => {
 	inquirer
 		.prompt([
