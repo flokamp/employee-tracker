@@ -2,13 +2,6 @@ const inquirer = require("inquirer");
 const mysql = require("mysql2");
 const cTable = require("console.table");
 
-require("console.table");
-var values = [
-	["max", 20],
-	["joe", 30],
-];
-console.table(values);
-
 const connection = mysql.createConnection({
 	host: "localhost",
 	port: 3306,
@@ -84,19 +77,16 @@ addDepartment = () => {
 			},
 		])
 		.then((answer) => {
-			connection.query(`INSERT INTO departments SET ?`, {
-				department_name: answer.name,
-			}),
+			connection.query(
+				`INSERT INTO departments SET ?`,
+				{
+					department_name: answer.name,
+				},
 				function (err, res) {
 					if (err) throw err;
-					const query = connection.query(
-						"SELECT * FROM departments",
-						// Include the callback function to catch any errors,
-						function (err, res) {
-							if (err) throw err;
-						}
-					);
-					console.table(rows);
-				};
+					console.log(answer.name + " successfully added!");
+					optionsPrompt();
+				}
+			);
 		});
 };
