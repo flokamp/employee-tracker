@@ -261,20 +261,14 @@ addEmployee = () => {
 			},
 		])
 		.then((answer) => {
-			let roleId = 0;
 			for (let i = 0; i < roleArr.length; i++) {
-				if (roleArr[i].title === answer.role) {
+				if (roleArr[i].name === answer.role) {
 					roleId = parseInt(roleArr[i].id);
-					break;
 				}
 			}
-
-			let managerId = 0;
 			for (let i = 0; i < employeeArr.length; i++) {
-				if (employeeArr[i].name === answer.name) {
+				if (employeeArr[i].name === answer.manager) {
 					managerId = parseInt(employeeArr[i].id);
-
-					break;
 				}
 			}
 			connection.query(
