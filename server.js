@@ -17,9 +17,10 @@ connection.connect((err) => {
 	optionsPrompt();
 });
 
+// get all roles and push to array
 roleArr = [];
 connection.query("SELECT * FROM roles ", function (err, rows) {
-	if (err) console.log(err);
+	if (err) throw err;
 	for (let i = 0; i < rows.length; i++) {
 		roleArr.push({
 			name: rows[i].title,
@@ -28,9 +29,10 @@ connection.query("SELECT * FROM roles ", function (err, rows) {
 	}
 });
 
+// get all employees and push to array
 employeeArr = ["No Manager"];
 connection.query("SELECT * FROM employees ", function (err, rows) {
-	if (err) console.log(err);
+	if (err) throw err;
 	for (let i = 0; i < rows.length; i++) {
 		employeeArr.push({
 			name: rows[i].first_name + " " + rows[i].last_name,
@@ -39,19 +41,19 @@ connection.query("SELECT * FROM employees ", function (err, rows) {
 	}
 });
 
-// get list of all departments and push to array
-getDepartments = () => {
-	let deptArr = [];
-	connection.query("SELECT * FROM departments", (err, res) => {
-		if (err) throw err;
-		for (var i = 0; i < res.length; i++) {
-			deptArr.push(res[i].department_name);
-		}
-	});
-	return deptArr;
-};
+// get all departments and push to array
+deptArr = [];
+connection.query("SELECT * FROM departments ", function (err, rows) {
+	if (err) throw err;
+	for (let i = 0; i < rows.length; i++) {
+		deptArr.push({
+			name: rows[i].department_name,
+			id: rows[i].id,
+		});
+	}
+});
 
-// ask the user what action they want to take
+// ask user what action they want to take
 function optionsPrompt() {
 	inquirer
 		.prompt({
@@ -65,7 +67,7 @@ function optionsPrompt() {
 				"Add department",
 				"Add role",
 				"Add employee",
-				// "Update employee role",
+				"Update employee role",
 			],
 		})
 		.then((answer) => {
@@ -88,13 +90,14 @@ function optionsPrompt() {
 				case "Add employee":
 					addEmployee();
 					break;
-				// case "Update employee role":
-				// 	updateEmployee();
-				// 	break;
+				case "Update employee role":
+					updateEmployee();
+					break;
 			}
 		});
 }
 
+// view table of all departments
 viewDepartments = () => {
 	connection.query("SELECT * FROM departments", function (err, res) {
 		if (err) throw err;
@@ -103,6 +106,7 @@ viewDepartments = () => {
 	});
 };
 
+// view table of all roles
 viewRoles = () => {
 	connection.query("SELECT * FROM roles", function (err, res) {
 		if (err) throw err;
@@ -111,6 +115,7 @@ viewRoles = () => {
 	});
 };
 
+// view table of all employees
 viewEmployees = () => {
 	connection.query("SELECT * FROM employees", function (err, res) {
 		if (err) throw err;
@@ -159,12 +164,12 @@ addRole = () => {
 			{
 				type: "input",
 				name: "title",
-				message: "What is the role title?",
+				message: "What is the name of the role?",
 				validate: (answer) => {
 					if (answer) {
 						return true;
 					} else {
-						console.log("Please enter the role title");
+						console.log("Please enter the role name");
 						return false;
 					}
 				},
@@ -172,7 +177,7 @@ addRole = () => {
 			{
 				type: "number",
 				name: "salary",
-				message: "What is the role salary?",
+				message: "What is the salary for this role?",
 				validate: (answer) => {
 					if (answer) {
 						return true;
@@ -186,7 +191,7 @@ addRole = () => {
 				type: "list",
 				name: "department",
 				message: "What department is this role in?",
-				choices: getDepartments(),
+				choices: deptArr,
 				validate: (answer) => {
 					if (answer) {
 						return true;
@@ -198,12 +203,17 @@ addRole = () => {
 			},
 		])
 		.then((answer) => {
+			for (let i = 0; i < deptArr.length; i++) {
+				if (deptArr[i].name === answer.department) {
+					deptId = parseInt(deptArr[i].id);
+				}
+			}
 			connection.query(
 				`INSERT INTO roles SET ?`,
 				{
 					title: answer.title,
 					salary: answer.salary,
-					department_id: answer.id,
+					department_id: deptId,
 				},
 				function (err, res) {
 					if (err) throw err;
@@ -214,7 +224,7 @@ addRole = () => {
 		});
 };
 
-// Add role from user input
+// Add employee from user input
 addEmployee = () => {
 	inquirer
 		.prompt([
