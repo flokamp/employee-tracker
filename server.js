@@ -122,9 +122,20 @@ viewRoles = () => {
 
 // view table of all employees
 viewEmployees = () => {
-	connection.query("SELECT * FROM employees", function (err, res) {
+	const sql = `SELECT employees.first_name, employees.last_name, roles.title, roles.salary, departments.department_name
+    AS department_name
+    FROM employees
+    JOIN roles on employees.role_id = roles.id
+    JOIN departments on roles.department_id = departments.id`;
+	connection.query(sql, function (err, res) {
 		if (err) throw err;
-		console.table(res);
+		console.table(res, [
+			"first_name",
+			"last_name",
+			"title",
+			"department_name",
+			"salary",
+		]);
 		optionsPrompt();
 	});
 };
