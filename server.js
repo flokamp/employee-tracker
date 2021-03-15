@@ -1,6 +1,6 @@
 const inquirer = require("inquirer");
 const mysql = require("mysql2");
-const cTable = require("console.table");
+const console = require("console");
 const e = require("express");
 
 const connection = mysql.createConnection({
@@ -101,16 +101,21 @@ function optionsPrompt() {
 viewDepartments = () => {
 	connection.query("SELECT * FROM departments", function (err, res) {
 		if (err) throw err;
-		console.table(res);
+		console.table(res, ["department_name"]);
 		optionsPrompt();
 	});
 };
 
 // view table of all roles
 viewRoles = () => {
-	connection.query("SELECT * FROM roles", function (err, res) {
+	const sql = `SELECT roles.*, departments.department_name 
+                AS department_id 
+                FROM roles
+                LEFT JOIN departments
+                ON roles.department_id = departments.id`;
+	connection.query(sql, function (err, res) {
 		if (err) throw err;
-		console.table(res);
+		console.table(res, ["title", "salary", "department_id"]);
 		optionsPrompt();
 	});
 };
