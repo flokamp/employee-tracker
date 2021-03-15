@@ -16,18 +16,18 @@ CREATE TABLE roles (
   id INTEGER(11) UNIQUE AUTO_INCREMENT NOT NULL,
   title VARCHAR(30) NOT NULL,
   salary DECIMAL,
-  department_id INTEGER,
-  CONSTRAINT fk_department FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL,
-  PRIMARY KEY (id)
+  department_id INTEGER NOT NULL,
+  PRIMARY KEY (id),
+  CONSTRAINT fk_department FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE CASCADE
 );
 
 CREATE TABLE employees (
   id INTEGER(11) UNIQUE AUTO_INCREMENT NOT NULL,
   first_name VARCHAR(30) NOT NULL,
   last_name VARCHAR(30) NOT NULL,
-  role_id INTEGER,
-  manager_id INTEGER,
-  CONSTRAINT fk_role FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE SET NULL,
-  CONSTRAINT fk_manager FOREIGN KEY (manager_id) REFERENCES employees(id) ON DELETE SET NULL,
-  PRIMARY KEY (id)
+  role_id INTEGER NOT NULL,
+  manager_id INTEGER NULL,
+  PRIMARY KEY (id),
+  CONSTRAINT fk_role FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE,
+  CONSTRAINT fk_manager FOREIGN KEY (manager_id) REFERENCES employees(id) ON DELETE CASCADE
 );

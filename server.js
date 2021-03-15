@@ -1,6 +1,7 @@
 const inquirer = require("inquirer");
 const mysql = require("mysql2");
 const cTable = require("console.table");
+const e = require("express");
 
 const connection = mysql.createConnection({
 	host: "localhost",
@@ -8,11 +9,34 @@ const connection = mysql.createConnection({
 	user: "root",
 	password: "!d0ntk0w",
 	database: "company_db",
+	charset: "utf8mb4",
 });
 
 connection.connect((err) => {
 	if (err) throw err;
 	optionsPrompt();
+});
+
+roleArr = [];
+connection.query("SELECT * FROM roles ", function (err, rows) {
+	if (err) console.log(err);
+	for (let i = 0; i < rows.length; i++) {
+		roleArr.push({
+			name: rows[i].title,
+			id: rows[i].id,
+		});
+	}
+});
+
+employeeArr = ["No Manager"];
+connection.query("SELECT * FROM employees ", function (err, rows) {
+	if (err) console.log(err);
+	for (let i = 0; i < rows.length; i++) {
+		employeeArr.push({
+			name: rows[i].first_name + " " + rows[i].last_name,
+			id: rows[i].id,
+		});
+	}
 });
 
 // get list of all departments and push to array
@@ -25,18 +49,6 @@ getDepartments = () => {
 		}
 	});
 	return deptArr;
-};
-
-// get list of all employees and push to array
-getEmployees = () => {
-	let employeeArr = [];
-	connection.query("SELECT * FROM employees", (err, res) => {
-		if (err) throw err;
-		for (var i = 0; i < res.length; i++) {
-			employeeArr.push(res[i].title);
-		}
-	});
-	return employeeArr;
 };
 
 // ask the user what action they want to take
@@ -204,12 +216,6 @@ addRole = () => {
 
 // Add role from user input
 addEmployee = () => {
-	let roleArr = [];
-	connection.query("SELECT * FROM roles", (err, rows) => {
-		if (err) throw err;
-		roleArr.push(rows);
-	});
-
 	inquirer
 		.prompt([
 			{
@@ -228,13 +234,13 @@ addEmployee = () => {
 			{
 				type: "list",
 				name: "role",
-				message: "What is the employees role?",
-				choices: [roleArr.rows],
+				message: "whats the role",
+				choices: roleArr,
 				validate: (answer) => {
 					if (answer) {
 						return true;
 					} else {
-						console.log("Please choose a role");
+						console.log("Please choose an option");
 						return false;
 					}
 				},
@@ -243,7 +249,7 @@ addEmployee = () => {
 				type: "list",
 				name: "manager",
 				message: "Who is the employees manager?",
-				choices: ["No manager", getEmployees()],
+				choices: employeeArr,
 				validate: (answer) => {
 					if (answer) {
 						return true;
@@ -255,13 +261,29 @@ addEmployee = () => {
 			},
 		])
 		.then((answer) => {
+			let roleId = 0;
+			for (let i = 0; i < roleArr.length; i++) {
+				if (roleArr[i].title === answer.role) {
+					roleId = parseInt(roleArr[i].id);
+					break;
+				}
+			}
+
+			let managerId = 0;
+			for (let i = 0; i < employeeArr.length; i++) {
+				if (employeeArr[i].name === answer.name) {
+					managerId = parseInt(employeeArr[i].id);
+
+					break;
+				}
+			}
 			connection.query(
 				`INSERT INTO employees SET ?`,
 				{
 					first_name: answer.name.split(" ").slice(0, -1).join(" "),
 					last_name: answer.name.split(" ").slice(-1).join(" "),
-					role_id: answer.role,
-					manager_id: answer.manager,
+					role_id: roleId,
+					manager_id: managerId,
 				},
 				function (err, res) {
 					if (err) throw err;
