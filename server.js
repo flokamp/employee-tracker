@@ -16,6 +16,13 @@ connection.connect((err) => {
 	optionsPrompt();
 });
 
+//function to format salary as currency
+var formatter = new Intl.NumberFormat("en-US", {
+	style: "currency",
+	currency: "USD",
+	currencySign: "accounting",
+});
+
 // get all roles and push to array
 roleArr = [];
 connection.query("SELECT * FROM roles ", function (err, rows) {
@@ -98,38 +105,63 @@ function optionsPrompt() {
 
 // view table of all departments
 viewDepartments = () => {
-	connection.query("SELECT * FROM departments", function (err, res) {
+	allDepartmentsArr = [];
+	connection.query("SELECT * FROM departments", function (err, rows) {
 		if (err) throw err;
-		console.table(res, ["department_name"]);
+		for (let i = 0; i < rows.length; i++) {
+			allDepartmentsArr.push({
+				Department: rows[i].department_name,
+			});
+		}
+		console.table(allDepartmentsArr);
 		optionsPrompt();
 	});
 };
 
 // view table of all roles
 viewRoles = () => {
+	allRolesArr = [];
 	const sql = `SELECT roles.*, departments.department_name 
                 AS department_id 
                 FROM roles
                 LEFT JOIN departments
                 ON roles.department_id = departments.id`;
-	connection.query(sql, function (err, res) {
+	connection.query(sql, function (err, rows) {
 		if (err) throw err;
-		console.table(res, ["title", "salary", "department_id"]);
+		for (let i = 0; i < rows.length; i++) {
+			var salary = formatter.format(rows[i].salary);
+			allRolesArr.push({
+				Role: rows[i].title,
+				Salary: salary,
+				Department: rows[i].department_id,
+			});
+		}
+		console.table(allRolesArr);
 		optionsPrompt();
 	});
 };
 
 // view table of all employees
 viewEmployees = () => {
+	allEmployeesArr = [];
 	const sql = `SELECT employees.first_name, employees.last_name, roles.title, roles.salary, manager.first_name
   AS manager
   FROM employees
   JOIN roles on employees.role_id = roles.id
   LEFT JOIN employees manager
   ON manager.id = employees.manager_id;`;
-	connection.query(sql, function (err, res) {
+	connection.query(sql, function (err, rows) {
 		if (err) throw err;
-		console.table(res);
+		for (let i = 0; i < rows.length; i++) {
+			var salary = formatter.format(rows[i].salary);
+			allEmployeesArr.push({
+				"Employee Name": rows[i].first_name + " " + rows[i].last_name,
+				Salary: salary,
+				Title: rows[i].title,
+				Manager: rows[i].manager,
+			});
+		}
+		console.table(allEmployeesArr);
 		optionsPrompt();
 	});
 };
@@ -161,6 +193,7 @@ addDepartment = () => {
 				function (err, res) {
 					if (err) throw err;
 					console.log(answer.name + " successfully added!");
+					deptArr.push();
 					optionsPrompt();
 				}
 			);
@@ -179,7 +212,7 @@ addRole = () => {
 					if (answer) {
 						return true;
 					} else {
-						console.log("Please enter the role name");
+						console.log("Please enter the role name.");
 						return false;
 					}
 				},
@@ -192,7 +225,7 @@ addRole = () => {
 					if (answer) {
 						return true;
 					} else {
-						console.log("Please enter the role salary");
+						console.log("Please enter a salary for this role.");
 						return false;
 					}
 				},
@@ -200,13 +233,13 @@ addRole = () => {
 			{
 				type: "list",
 				name: "department",
-				message: "What department is this role in?",
+				message: "Which department is this role in?",
 				choices: deptArr,
 				validate: (answer) => {
 					if (answer) {
 						return true;
 					} else {
-						console.log("Please choose a department");
+						console.log("Please choose a department.");
 						return false;
 					}
 				},
@@ -228,6 +261,7 @@ addRole = () => {
 				function (err, res) {
 					if (err) throw err;
 					console.log(answer.title + " successfully added!");
+					roleArr.push();
 					optionsPrompt();
 				}
 			);
@@ -289,6 +323,8 @@ addEmployee = () => {
 			for (let i = 0; i < employeeArr.length; i++) {
 				if (employeeArr[i].name === answer.manager) {
 					managerId = parseInt(employeeArr[i].id);
+				} else {
+					managerId = null;
 				}
 			}
 			connection.query(
@@ -302,6 +338,7 @@ addEmployee = () => {
 				function (err, res) {
 					if (err) throw err;
 					console.log(answer.title + " successfully added!");
+					employeeArr.push();
 					optionsPrompt();
 				}
 			);
@@ -316,13 +353,13 @@ updateEmployee = () => {
 			{
 				type: "list",
 				name: "employee",
-				message: "Who would you like to update?",
+				message: "Which employee would you like to update?",
 				choices: employeeArr,
 				validate: (answer) => {
 					if (answer) {
 						return true;
 					} else {
-						console.log("Please select an employee");
+						console.log("Please select an employee.");
 						return false;
 					}
 				},
@@ -330,13 +367,13 @@ updateEmployee = () => {
 			{
 				type: "list",
 				name: "role",
-				message: "What is their role?",
+				message: "What role would you like to re-assign them to?",
 				choices: roleArr,
 				validate: (answer) => {
 					if (answer) {
 						return true;
 					} else {
-						console.log("Please select a role");
+						console.log("Please select a role.");
 						return false;
 					}
 				},
@@ -362,6 +399,9 @@ updateEmployee = () => {
 					employeeId,
 				function (err, res) {
 					if (err) throw err;
+					console.log(
+						answer.employee + "'s role has been changed to " + answer.role
+					);
 					optionsPrompt();
 				}
 			);
