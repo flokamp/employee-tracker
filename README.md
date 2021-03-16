@@ -18,7 +18,7 @@ Features includes:
 - Update employee roles
 WHEN I choose to view all departments
 
-![Screenshot](./assets/images/Screen Shot 2021-03-16 at 12.35.30 AM)
+![Screenshot](assets/images/employeetracker.png)
 
 ## Table of Contents
 
