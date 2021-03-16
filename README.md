@@ -23,6 +23,7 @@ WHEN I choose to view all departments
 ## Table of Contents
 
 - [Installation](#installation)
+- [Usage](#usage)
 - [Credits](#credits)
 - [License](#license)
 - [Contributing](#contributing)
@@ -32,8 +33,14 @@ WHEN I choose to view all departments
 
 To install this application, you'll need Git and Node.js installed on your computer. From the command line:
 
-1. Clone this repository: `git@github.com:flokamp/note-taker-2.git`
+1. Clone this repository: `git@github.com:flokamp/employee-tracker.git`
 2. Go to the root directory and install dependencies: `npm install`
+
+## Usage
+
+To run this application,
+1. Enter `node server` in the command line
+2. Select a prompt to view or update the database
 
 
 ## License
