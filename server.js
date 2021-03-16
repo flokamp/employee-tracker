@@ -9,7 +9,6 @@ const connection = mysql.createConnection({
 	user: "root",
 	password: "!d0ntk0w",
 	database: "company_db",
-	charset: "utf8mb4",
 });
 
 connection.connect((err) => {
@@ -122,19 +121,15 @@ viewRoles = () => {
 
 // view table of all employees
 viewEmployees = () => {
-	const sql = `SELECT employees.*, roles.title, roles.salary, employees.manager_id
-    AS manager_id
-    FROM employees
-    JOIN roles on employees.role_id = roles.id`;
+	const sql = `SELECT employees.first_name, employees.last_name, roles.title, roles.salary, manager.first_name
+  AS manager
+  FROM employees
+  JOIN roles on employees.role_id = roles.id
+  LEFT JOIN employees manager
+  ON manager.id = employees.manager_id;`;
 	connection.query(sql, function (err, res) {
 		if (err) throw err;
-		console.table(res, [
-			"first_name",
-			"last_name",
-			"title",
-			"salary",
-			"manager_id",
-		]);
+		console.table(res);
 		optionsPrompt();
 	});
 };
@@ -313,6 +308,7 @@ addEmployee = () => {
 		});
 };
 
+// Update an employees role
 updateEmployee = () => {
 	var allEmployeesArr = employeeArr.shift();
 	inquirer
@@ -346,13 +342,14 @@ updateEmployee = () => {
 				},
 			},
 		])
+		// get the updated role id
 		.then((answer) => {
 			for (let i = 0; i < roleArr.length; i++) {
 				if (roleArr[i].name === answer.role) {
 					newRoleId = parseInt(roleArr[i].id);
 				}
 			}
-			console.log(answer.role.id);
+			// get the id of the updated employee
 			for (let i = 0; i < employeeArr.length; i++) {
 				if (employeeArr[i].name === answer.employee) {
 					employeeId = parseInt(employeeArr[i].id);
