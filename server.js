@@ -122,7 +122,7 @@ viewRoles = () => {
 
 // view table of all employees
 viewEmployees = () => {
-	const sql = `SELECT employees.first_name, employees.last_name, roles.title, roles.salary, employees.id, employees.first_name
+	const sql = `SELECT employees.*, roles.title, roles.salary, employees.manager_id
     AS manager_id
     FROM employees
     JOIN roles on employees.role_id = roles.id`;
@@ -134,7 +134,6 @@ viewEmployees = () => {
 			"title",
 			"salary",
 			"manager_id",
-			"first_name",
 		]);
 		optionsPrompt();
 	});
@@ -353,23 +352,17 @@ updateEmployee = () => {
 					newRoleId = parseInt(roleArr[i].id);
 				}
 			}
+			console.log(answer.role.id);
 			for (let i = 0; i < employeeArr.length; i++) {
 				if (employeeArr[i].name === answer.employee) {
 					employeeId = parseInt(employeeArr[i].id);
 				}
 			}
 			connection.query(
-				`UPDATE employees SET role_id = ? 
-        WHERE id = ?`,
-				[
-					{
-						role_id: newRoleId,
-					},
-					{
-						id: employeeId,
-					},
-				],
-
+				`UPDATE employees SET role_id = ` +
+					newRoleId +
+					` WHERE id = ` +
+					employeeId,
 				function (err, res) {
 					if (err) throw err;
 					optionsPrompt();
