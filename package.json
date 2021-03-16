@@ -20,6 +20,7 @@
 	"homepage": "https://github.com/flokamp/employee-tracker#readme",
 	"dependencies": {
 		"cli-table": "^0.3.5",
+		"console-table-printer": "^2.8.1",
 		"console.table": "^0.10.0",
 		"express": "^4.17.1",
 		"homebrew": "^0.1.0",

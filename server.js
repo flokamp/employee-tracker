@@ -2,6 +2,7 @@ const inquirer = require("inquirer");
 const mysql = require("mysql2");
 const console = require("console");
 const e = require("express");
+const { printTable } = require("console-table-printer");
 
 const connection = mysql.createConnection({
 	host: "localhost",
@@ -110,10 +111,11 @@ viewDepartments = () => {
 		if (err) throw err;
 		for (let i = 0; i < rows.length; i++) {
 			allDepartmentsArr.push({
-				Department: rows[i].department_name,
+				ID: rows[i].id,
+				DEPARTMENT: rows[i].department_name,
 			});
 		}
-		console.table(allDepartmentsArr);
+		printTable(allDepartmentsArr);
 		optionsPrompt();
 	});
 };
@@ -131,12 +133,13 @@ viewRoles = () => {
 		for (let i = 0; i < rows.length; i++) {
 			var salary = formatter.format(rows[i].salary);
 			allRolesArr.push({
-				Role: rows[i].title,
-				Salary: salary,
-				Department: rows[i].department_id,
+				"ROLE ID": rows[i].id,
+				JOB: rows[i].title,
+				SALARY: salary,
+				DEPARTMENT: rows[i].department_id,
 			});
 		}
-		console.table(allRolesArr);
+		printTable(allRolesArr);
 		optionsPrompt();
 	});
 };
@@ -144,7 +147,7 @@ viewRoles = () => {
 // view table of all employees
 viewEmployees = () => {
 	allEmployeesArr = [];
-	const sql = `SELECT employees.first_name, employees.last_name, roles.title, roles.salary, manager.first_name
+	const sql = `SELECT employees.id, employees.first_name, employees.last_name, roles.title, roles.salary, manager.first_name
   AS manager
   FROM employees
   JOIN roles on employees.role_id = roles.id
@@ -155,13 +158,14 @@ viewEmployees = () => {
 		for (let i = 0; i < rows.length; i++) {
 			var salary = formatter.format(rows[i].salary);
 			allEmployeesArr.push({
-				"Employee Name": rows[i].first_name + " " + rows[i].last_name,
-				Salary: salary,
-				Title: rows[i].title,
-				Manager: rows[i].manager,
+				"EMPLOYEE ID": rows[i].id,
+				"EMPLOYEE NAME": rows[i].first_name + " " + rows[i].last_name,
+				SALARY: salary,
+				TITLE: rows[i].title,
+				MANAGER: rows[i].manager,
 			});
 		}
-		console.table(allEmployeesArr);
+		printTable(allEmployeesArr);
 		optionsPrompt();
 	});
 };
