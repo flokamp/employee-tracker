@@ -122,19 +122,19 @@ viewRoles = () => {
 
 // view table of all employees
 viewEmployees = () => {
-	const sql = `SELECT employees.first_name, employees.last_name, roles.title, roles.salary, departments.department_name
-    AS department_name
+	const sql = `SELECT employees.first_name, employees.last_name, roles.title, roles.salary, employees.id, employees.first_name
+    AS manager_id
     FROM employees
-    JOIN roles on employees.role_id = roles.id
-    JOIN departments on roles.department_id = departments.id`;
+    JOIN roles on employees.role_id = roles.id`;
 	connection.query(sql, function (err, res) {
 		if (err) throw err;
 		console.table(res, [
 			"first_name",
 			"last_name",
 			"title",
-			"department_name",
 			"salary",
+			"manager_id",
+			"first_name",
 		]);
 		optionsPrompt();
 	});
@@ -314,4 +314,66 @@ addEmployee = () => {
 		});
 };
 
-updateEmployee = () => {};
+updateEmployee = () => {
+	var allEmployeesArr = employeeArr.shift();
+	inquirer
+		.prompt([
+			{
+				type: "list",
+				name: "employee",
+				message: "Who would you like to update?",
+				choices: employeeArr,
+				validate: (answer) => {
+					if (answer) {
+						return true;
+					} else {
+						console.log("Please select an employee");
+						return false;
+					}
+				},
+			},
+			{
+				type: "list",
+				name: "role",
+				message: "What is their role?",
+				choices: roleArr,
+				validate: (answer) => {
+					if (answer) {
+						return true;
+					} else {
+						console.log("Please select a role");
+						return false;
+					}
+				},
+			},
+		])
+		.then((answer) => {
+			for (let i = 0; i < roleArr.length; i++) {
+				if (roleArr[i].name === answer.role) {
+					newRoleId = parseInt(roleArr[i].id);
+				}
+			}
+			for (let i = 0; i < employeeArr.length; i++) {
+				if (employeeArr[i].name === answer.employee) {
+					employeeId = parseInt(employeeArr[i].id);
+				}
+			}
+			connection.query(
+				`UPDATE employees SET role_id = ? 
+        WHERE id = ?`,
+				[
+					{
+						role_id: newRoleId,
+					},
+					{
+						id: employeeId,
+					},
+				],
+
+				function (err, res) {
+					if (err) throw err;
+					optionsPrompt();
+				}
+			);
+		});
+};
