@@ -1,5 +1,5 @@
 # Employee Tracker
-[How to use the employee tracker] (https://drive.google.com/file/d/1xdbBBxCPM4yGzusuddJhl97aXzLbQH81/view)
+[How to use the employee tracker](https://drive.google.com/file/d/1xdbBBxCPM4yGzusuddJhl97aXzLbQH81/view)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -18,7 +18,7 @@ Features includes:
 - Update employee roles
 WHEN I choose to view all departments
 
-![Screenshot]()
+![Screenshot](assets/images/employeetracker.png)
 
 ## Table of Contents
 
